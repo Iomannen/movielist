@@ -1,0 +1,74 @@
+.movieList {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  justify-self: center;
+  width: 950px;
+  row-gap: 40px;
+  column-gap: 35px;
+}
+.movieCard {
+  overflow: hidden;
+  background-color: #000000a6;
+  display: flex;
+  gap: 20px;
+  width: 454px;
+  color: #ffffff;
+  height: 285px;
+  border-radius: 10px;
+}
+.content_half {
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  gap: 7px;
+}
+.movieCard__poster {
+  width: 183px;
+  height: 285px;
+}
+.movieCard__movieTitle {
+  width: 75%;
+  font-size: 16px;
+  padding-bottom: 8px;
+}
+.movieCard__rank {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  right: 10px;
+  top: 10px;
+  font-size: 12px;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  border: 2px solid rgb(233, 209, 0);
+}
+.movieCard__date {
+  font-size: 12px;
+}
+.movieCard__genres {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+.movieCard__genre {
+  font-size: 12px;
+  padding: 3px 5px;
+  border-radius: 2px;
+  background-color: rgb(24, 144, 255);
+}
+.movieCard__description {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+
+  overflow: hidden;
+  width: 228px;
+  font-size: 12px;
+  line-height: 2;
+}
