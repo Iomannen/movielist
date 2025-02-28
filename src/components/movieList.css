@@ -62,13 +62,10 @@
   background-color: rgb(24, 144, 255);
 }
 .movieCard__description {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 5;
-  line-clamp: 5;
-
-  overflow: hidden;
+  padding-right: 10px;
+  overflow: scroll;
   width: 228px;
+  height: 121px;
   font-size: 12px;
   line-height: 2;
 }
