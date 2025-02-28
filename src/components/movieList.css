@@ -63,9 +63,25 @@
 }
 .movieCard__description {
   padding-right: 10px;
-  overflow: scroll;
+  overflow-y: auto;
+  overflow-x: hidden;
   width: 228px;
   height: 121px;
   font-size: 12px;
   line-height: 2;
+}
+
+/* Стилизация полосы прокрутки */
+.movieCard__description::-webkit-scrollbar {
+  width: 3px; /* ширина полосы прокрутки */
+}
+
+.movieCard__description::-webkit-scrollbar-thumb {
+  background-color: rgb(43, 41, 41); /* цвет полосы прокрутки */
+  border-radius: 3px;
+}
+
+.movieCard__description::-webkit-scrollbar-track {
+  background: #00000000; /* цвет фона полосы прокрутки */
+  border-radius: 2px;
 }
