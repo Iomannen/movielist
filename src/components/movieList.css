@@ -85,3 +85,7 @@
   background: #00000000; /* цвет фона полосы прокрутки */
   border-radius: 2px;
 }
+.alert {
+  position: absolute;
+  top: 40%;
+}

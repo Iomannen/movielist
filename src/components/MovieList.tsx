@@ -1,7 +1,7 @@
 import { FC, useState, useEffect } from "react";
 import "./movieList.css";
-
-import { format } from "date-fns";
+import { Spin, Alert } from "antd";
+import MovieCard from "./movieCard/MovieCard";
 const options = {
   method: "GET",
   headers: {
@@ -10,6 +10,10 @@ const options = {
       "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwN2IyNDYzMGY0MjcyZmM2MWQ0YzkxNGIzNTFiNzNhNCIsIm5iZiI6MTc0MDczMTM5MS4wOTEsInN1YiI6IjY3YzE3M2ZmMWYzZjgxYjYwN2EyMzE1ZSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.Gmh5Sci3JPkNbF8Y85ap3r7DGnRpgB_k0J7L_3AuHkg",
   },
 };
+interface Error {
+  state: boolean;
+  message: string | null;
+}
 interface Movie {
   adult: boolean;
   backdrop_path: string;
@@ -29,53 +33,81 @@ interface Movie {
 
 const MovieList: FC = () => {
   const [movieList, setMovies] = useState<Movie[]>([]);
+  const [error, setError] = useState<Error>({ state: false, message: null });
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  const handleOffline = () => {
+    return isOnline ? (
+      ""
+    ) : (
+      <Alert message="Error" description="Internet connection error" type="error" showIcon />
+    );
+  };
+
+  const handleError = () => {
+    return !error.state ? (
+      ""
+    ) : error.message === "Failed to fetch" ? (
+      <Alert
+        className="alert"
+        message="Error"
+        description="Failed to fetch. Please try to reload page using VPN"
+        type="error"
+        showIcon
+      />
+    ) : (
+      <Alert message="Error" description={error.message} type="error" showIcon className="alert" />
+    );
+  };
+
+  const showSpinner = () => {
+    return movieList.length === 0 && !error.state ? <Spin size="large" className="alert" /> : "";
+  };
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchMovies = async () => {
-      const response = await fetch(
-        "https://api.themoviedb.org/3/search/movie?query=return&include_adult=false&language=en-US&page=1",
-        options,
-      );
+      try {
+        const response = await fetch(
+          "https://api.themoviedb.org/3/search/movie?query=return&include_adult=false&language=en-US&page=1",
+          options,
+        );
 
-      if (!response.ok) {
-        throw new Error(`Ошибка HTTP: ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`Ошибка HTTP: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log(data.results);
+        setMovies(data.results);
+      } catch (e: unknown) {
+        if (e.message === "Failed to fetch") {
+          setError({ state: true, message: e.message });
+        }
       }
-
-      const data = await response.json();
-      console.log(data.results);
-      setMovies(data.results);
     };
 
     fetchMovies();
-  }, []); // Пустой массив зависимостей, чтобы запрос отправлялся только один раз при монтировании
+  }, []);
 
   return (
     <div className="movieList">
+      {handleOffline()}
+      {handleError()}
+      {showSpinner()}
       {movieList.map((movie: Movie) => (
-        <div className="movieCard" key={movie.id}>
-          <div className="poster_half">
-            <img
-              className="movieCard__poster"
-              src={"https://image.tmdb.org/t/p/w500" + movie.poster_path}
-            ></img>
-          </div>
-          <div className="content_half" style={{ width: 251 }}>
-            <div className="movieCard__movieTitle">{movie.title}</div>
-            <div className="movieCard__rank">{movie.vote_average.toFixed(1)}</div>
-            <div className="movieCard__date">
-              {movie.release_date ? format(movie.release_date, "MMMM dd, yyyy") : "Unknown date"}
-            </div>
-            <div className="movieCard__genres">
-              {movie.genre_ids.map((genre: number) => (
-                <div key={genre} className="movieCard__genre">
-                  Genre
-                </div>
-              ))}
-            </div>
-            <div className="movieCard__description">{movie.overview}</div>
-            <div className="movieCard__rating"></div>
-          </div>
-        </div>
+        <MovieCard movie={movie} />
       ))}
     </div>
   );
