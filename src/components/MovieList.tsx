@@ -1,6 +1,6 @@
 import { FC, useState, useEffect } from "react";
 import "./movieList.css";
-import poster from "../assets/fluffykitten.png";
+
 import { format } from "date-fns";
 const options = {
   method: "GET",
@@ -54,7 +54,10 @@ const MovieList: FC = () => {
       {movieList.map((movie: Movie) => (
         <div className="movieCard" key={movie.id}>
           <div className="poster_half">
-            <img className="movieCard__poster" src={poster}></img>
+            <img
+              className="movieCard__poster"
+              src={"https://image.tmdb.org/t/p/w500" + movie.poster_path}
+            ></img>
           </div>
           <div className="content_half" style={{ width: 251 }}>
             <div className="movieCard__movieTitle">{movie.title}</div>
