@@ -1,5 +1,5 @@
 import { FC } from "react";
-import "../movieList.css";
+import style from "./movieCard.module.css";
 import placeholder from "../../assets/fluffykitten.png";
 import { format } from "date-fns";
 
@@ -19,36 +19,39 @@ interface Movie {
   vote_average: number;
   vote_count: number;
 }
+
 interface Props {
   movie: Movie;
 }
+
 const MovieCard: FC<Props> = (props) => {
   const { movie } = props;
+
   return (
-    <div className="movieCard" key={movie.id}>
+    <div className={style.card} key={movie.id}>
       <div className="poster_half">
         <img
-          className="movieCard__poster"
+          className={style.poster}
           src={
             movie.poster_path ? "https://image.tmdb.org/t/p/w500" + movie.poster_path : placeholder
           }
         ></img>
       </div>
-      <div className="content_half" style={{ width: 251 }}>
-        <div className="movieCard__movieTitle">{movie.title}</div>
-        <div className="movieCard__rank">{movie.vote_average.toFixed(1)}</div>
-        <div className="movieCard__date">
+      <div className={style.content_half} style={{ width: 251 }}>
+        <div className={style.title}>{movie.title}</div>
+        <div className={style.rank}>{movie.vote_average.toFixed(1)}</div>
+        <div className={style.date}>
           {movie.release_date ? format(movie.release_date, "MMMM dd, yyyy") : "Unknown date"}
         </div>
-        <div className="movieCard__genres">
+        <div className={style.genres}>
           {movie.genre_ids.map((genre: number) => (
-            <div key={genre} className="movieCard__genre">
+            <div key={genre} className={style.genre}>
               Genre
             </div>
           ))}
         </div>
-        <div className="movieCard__description">{movie.overview}</div>
-        <div className="movieCard__rating"></div>
+        <div className={style.description}>{movie.overview}</div>
+        <div className={style.rating}></div>
       </div>
     </div>
   );

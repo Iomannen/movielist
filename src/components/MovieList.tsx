@@ -1,5 +1,5 @@
 import { FC, useState, useEffect } from "react";
-import "./movieList.css";
+import style from "./movieList.module.css";
 import { Spin, Alert } from "antd";
 import MovieCard from "./movieCard/MovieCard";
 const options = {
@@ -102,7 +102,7 @@ const MovieList: FC = () => {
   }, []);
 
   return (
-    <div className="movieList">
+    <div className={style.movielist}>
       {handleOffline()}
       {handleError()}
       {showSpinner()}

@@ -1,14 +1,4 @@
-.movieList {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: center;
-  justify-self: center;
-  width: 950px;
-  row-gap: 40px;
-  column-gap: 35px;
-}
-.movieCard {
+.card {
   overflow: hidden;
   background-color: #000000a6;
   display: flex;
@@ -25,16 +15,16 @@
   position: relative;
   gap: 7px;
 }
-.movieCard__poster {
+.poster {
   width: 183px;
   height: 285px;
 }
-.movieCard__movieTitle {
+.title {
   width: 75%;
   font-size: 16px;
   padding-bottom: 8px;
 }
-.movieCard__rank {
+.rank {
   position: absolute;
   display: flex;
   justify-content: center;
@@ -47,21 +37,21 @@
   height: 30px;
   border: 2px solid rgb(233, 209, 0);
 }
-.movieCard__date {
+.date {
   font-size: 12px;
 }
-.movieCard__genres {
+.genres {
   display: flex;
   flex-direction: row;
   gap: 8px;
 }
-.movieCard__genre {
+.genre {
   font-size: 12px;
   padding: 3px 5px;
   border-radius: 2px;
   background-color: rgb(24, 144, 255);
 }
-.movieCard__description {
+.description {
   padding-right: 10px;
   overflow-y: auto;
   overflow-x: hidden;
@@ -72,16 +62,16 @@
 }
 
 /* Стилизация полосы прокрутки */
-.movieCard__description::-webkit-scrollbar {
+.description::-webkit-scrollbar {
   width: 3px; /* ширина полосы прокрутки */
 }
 
-.movieCard__description::-webkit-scrollbar-thumb {
+.description::-webkit-scrollbar-thumb {
   background-color: rgb(43, 41, 41); /* цвет полосы прокрутки */
   border-radius: 3px;
 }
 
-.movieCard__description::-webkit-scrollbar-track {
+.description::-webkit-scrollbar-track {
   background: #00000000; /* цвет фона полосы прокрутки */
   border-radius: 2px;
 }
