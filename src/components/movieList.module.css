@@ -8,3 +8,7 @@
   row-gap: 40px;
   column-gap: 35px;
 }
+.alert {
+  position: absolute;
+  top: 40%;
+}
