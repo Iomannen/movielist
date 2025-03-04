@@ -1,7 +1,9 @@
 import { FC, useState, useEffect } from "react";
 import style from "./movieList.module.css";
-import { Spin, Alert } from "antd";
+import { Spin, Alert, Input } from "antd";
 import MovieCard from "./movieCard/MovieCard";
+import { ChangeEvent } from "react";
+import { useDebouncedCallback } from "use-debounce";
 
 const options = {
   method: "GET",
@@ -37,6 +39,35 @@ const MovieList: FC = () => {
   const [movieList, setMovies] = useState<Movie[]>([]);
   const [error, setError] = useState<Error>({ state: false, message: null });
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
+    setError({ state: false, message: null });
+    if (e.target.value == null) return;
+    setMovies([]);
+    const fetchMovies = async () => {
+      try {
+        const response = await fetch(
+          `https://api.themoviedb.org/3/search/movie?query=${e.target.value}&include_adult=false&language=en-US&page=1`,
+          options,
+        );
+
+        if (!response.ok) {
+          throw new Error(`Ошибка HTTP: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.results.length === 0) {
+          throw new Error("Nothing is found");
+        }
+        setMovies(data.results);
+      } catch (e: unknown) {
+        if (!(e instanceof Error)) return;
+        setError({ state: true, message: e.message });
+      }
+    };
+    fetchMovies();
+  };
+
+  const debounceSearch = useDebouncedCallback(handleSearch, 1000);
 
   const handleOffline = () => {
     return isOnline ? (
@@ -93,7 +124,7 @@ const MovieList: FC = () => {
     const fetchMovies = async () => {
       try {
         const response = await fetch(
-          "https://api.themoviedb.org/3/search/movie?query=return&include_adult=false&language=en-US&page=1",
+          `https://api.themoviedb.org/3/search/movie?query=return&include_adult=false&language=en-US&page=1`,
           options,
         );
 
@@ -114,11 +145,12 @@ const MovieList: FC = () => {
 
   return (
     <div className={style.movielist}>
+      <Input className={style.input} placeholder="Type to search..." onChange={debounceSearch} />
       {handleOffline()}
       {handleError()}
       {showSpinner()}
       {movieList.map((movie: Movie) => (
-        <MovieCard movie={movie} />
+        <MovieCard movie={movie} key={movie.id} />
       ))}
     </div>
   );

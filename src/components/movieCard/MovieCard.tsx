@@ -28,7 +28,7 @@ const MovieCard: FC<Props> = (props) => {
   const { movie } = props;
 
   return (
-    <div className={style.card} key={movie.id}>
+    <div className={style.card}>
       <div className="poster_half">
         <img
           className={style.poster}
