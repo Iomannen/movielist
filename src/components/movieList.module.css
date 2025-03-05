@@ -8,11 +8,10 @@
   width: 950px;
   row-gap: 40px;
   column-gap: 35px;
+  padding-bottom: 30px;
 }
 .alert {
   position: absolute;
   top: 40%;
 }
-.pagination {
-  padding-bottom: 30px;
-}
+

@@ -203,7 +203,6 @@ const MovieList: FC = () => {
           total={totalPages}
           onChange={handlePagination}
           showSizeChanger={false}
-          className={style.pagination}
           hideOnSinglePage={true}
           showTitle={false}
         />
