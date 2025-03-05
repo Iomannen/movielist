@@ -1,6 +1,6 @@
 import { FC, useState, useEffect } from "react";
 import style from "./movieList.module.css";
-import { Spin, Alert, Input } from "antd";
+import { Spin, Alert, Input, Pagination, ConfigProvider } from "antd";
 import MovieCard from "./movieCard/MovieCard";
 import { ChangeEvent } from "react";
 import { useDebouncedCallback } from "use-debounce";
@@ -36,14 +36,46 @@ interface Movie {
 }
 
 const MovieList: FC = () => {
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [page, setPage] = useState<number>(1);
+  const [searchValue, setSearchValue] = useState<string>("return");
   const [movieList, setMovies] = useState<Movie[]>([]);
   const [error, setError] = useState<Error>({ state: false, message: null });
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
+  const handlePagination = (page: number) => {
+    setPage(page);
+    setMovies([]);
+    const fetchMovies = async () => {
+      try {
+        const response = await fetch(
+          `https://api.themoviedb.org/3/search/movie?query=${searchValue}&include_adult=false&language=en-US&page=${page}`,
+          options,
+        );
+        if (!response.ok) {
+          throw new Error(`Ошибка HTTP: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data.results.length === 0) {
+          throw new Error("Nothing is found");
+        }
+        setMovies(data.results);
+        setTotalPages(data.total_pages);
+      } catch (e: unknown) {
+        if (!(e instanceof Error)) return;
+        setError({ state: true, message: e.message });
+      }
+    };
+    fetchMovies();
+  };
+
   const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
+    setTotalPages(1);
+    setPage(1);
     setError({ state: false, message: null });
     if (e.target.value == null) return;
     setMovies([]);
+    setSearchValue(e.target.value);
     const fetchMovies = async () => {
       try {
         const response = await fetch(
@@ -59,9 +91,10 @@ const MovieList: FC = () => {
           throw new Error("Nothing is found");
         }
         setMovies(data.results);
-      } catch (e: unknown) {
-        if (!(e instanceof Error)) return;
-        setError({ state: true, message: e.message });
+        setTotalPages(data.total_pages);
+      } catch (error: unknown) {
+        if (!(error instanceof Error)) return;
+        setError({ state: true, message: error.message });
       }
     };
     fetchMovies();
@@ -132,8 +165,8 @@ const MovieList: FC = () => {
           throw new Error(`Ошибка HTTP: ${response.status}`);
         }
         const data = await response.json();
-        console.log(data.results);
         setMovies(data.results);
+        setTotalPages(data.total_pages);
       } catch (e: unknown) {
         if (!(e instanceof Error)) return;
         setError({ state: true, message: e.message });
@@ -152,6 +185,29 @@ const MovieList: FC = () => {
       {movieList.map((movie: Movie) => (
         <MovieCard movie={movie} key={movie.id} />
       ))}
+      <ConfigProvider
+        theme={{
+          components: {
+            Pagination: {
+              itemActiveBg: "#1890FF",
+              itemBg: "#33333C",
+              colorText: "#FFFFFF",
+              itemInputBg: "#FFFFFF",
+            },
+          },
+        }}
+      >
+        <Pagination
+          defaultCurrent={1}
+          current={page}
+          total={totalPages}
+          onChange={handlePagination}
+          showSizeChanger={false}
+          className={style.pagination}
+          hideOnSinglePage={true}
+          showTitle={false}
+        />
+      </ConfigProvider>
     </div>
   );
 };

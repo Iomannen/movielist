@@ -7,6 +7,7 @@
   color: #ffffff;
   height: 285px;
   border-radius: 10px;
+  box-shadow: 0px 0px 30px 2px #000000a6;
 }
 .content_half {
   padding-top: 12px;

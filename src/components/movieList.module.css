@@ -13,5 +13,6 @@
   position: absolute;
   top: 40%;
 }
-.input {
+.pagination {
+  padding-bottom: 30px;
 }
