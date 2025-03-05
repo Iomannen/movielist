@@ -1,10 +1,10 @@
 import { FC, useState, useEffect } from "react";
 import style from "./movieList.module.css";
-import { Spin, Alert, Input, Pagination, ConfigProvider } from "antd";
+import { Spin, Alert, Input } from "antd";
 import MovieCard from "./movieCard/MovieCard";
 import { ChangeEvent } from "react";
 import { useDebouncedCallback } from "use-debounce";
-
+import PaginationComponent from "./pagination/Pagination";
 const options = {
   method: "GET",
   headers: {
@@ -185,28 +185,7 @@ const MovieList: FC = () => {
       {movieList.map((movie: Movie) => (
         <MovieCard movie={movie} key={movie.id} />
       ))}
-      <ConfigProvider
-        theme={{
-          components: {
-            Pagination: {
-              itemActiveBg: "#1890FF",
-              itemBg: "#33333C",
-              colorText: "#FFFFFF",
-              itemInputBg: "#FFFFFF",
-            },
-          },
-        }}
-      >
-        <Pagination
-          defaultCurrent={1}
-          current={page}
-          total={totalPages}
-          onChange={handlePagination}
-          showSizeChanger={false}
-          hideOnSinglePage={true}
-          showTitle={false}
-        />
-      </ConfigProvider>
+      <PaginationComponent page={page} total={totalPages} onChange={handlePagination} />
     </div>
   );
 };
