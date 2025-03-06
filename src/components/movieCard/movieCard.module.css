@@ -25,7 +25,7 @@
   font-size: 16px;
   padding-bottom: 8px;
 }
-.rank {
+.red {
   position: absolute;
   display: flex;
   justify-content: center;
@@ -36,8 +36,48 @@
   border-radius: 50%;
   width: 30px;
   height: 30px;
-  border: 2px solid rgb(233, 209, 0);
+  border: 2px solid #e90000;
 }
+.orange {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  right: 10px;
+  top: 10px;
+  font-size: 12px;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  border: 2px solid #e97e00;
+}
+.yellow {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  right: 10px;
+  top: 10px;
+  font-size: 12px;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  border: 2px solid #e9d100;
+}
+.green {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  right: 10px;
+  top: 10px;
+  font-size: 12px;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  border: 2px solid #66e900;
+}
+
 .date {
   font-size: 12px;
 }

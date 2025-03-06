@@ -1,10 +1,11 @@
-import { FC, useState, useEffect } from "react";
+import { FC, useState, useEffect, createContext } from "react";
 import style from "./movieList.module.css";
 import { Spin, Alert, Input } from "antd";
 import MovieCard from "./movieCard/MovieCard";
 import { ChangeEvent } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import PaginationComponent from "./pagination/Pagination";
+import PaginationComponent from "./pagination/PaginationComponent";
+
 const options = {
   method: "GET",
   headers: {
@@ -14,10 +15,22 @@ const options = {
   },
 };
 
+interface Genre {
+  id: number;
+  name: string;
+}
+
+type GenreArray = Array<Genre>;
+
+interface APIGenresAnswer {
+  genres: GenreArray;
+}
+
 interface Error {
   state: boolean;
   message: string | null;
 }
+
 interface Movie {
   adult: boolean;
   backdrop_path: string;
@@ -34,6 +47,7 @@ interface Movie {
   vote_average: number;
   vote_count: number;
 }
+export const GenreContext = createContext<APIGenresAnswer | null>(null);
 
 const MovieList: FC = () => {
   const [totalPages, setTotalPages] = useState<number>(1);
@@ -42,6 +56,27 @@ const MovieList: FC = () => {
   const [movieList, setMovies] = useState<Movie[]>([]);
   const [error, setError] = useState<Error>({ state: false, message: null });
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  const [genres, setGenres] = useState<APIGenresAnswer | null>(null);
+
+  useEffect(() => {
+    const makeContext = async () => {
+      try {
+        const genresResponse = await fetch(
+          "https://api.themoviedb.org/3/genre/movie/list?language=en",
+          options,
+        );
+        const genresData = await genresResponse.json();
+        setGenres(genresData);
+      } catch (e) {
+        console.error("Failed to load genres:", e);
+      }
+    };
+
+    if (genres === null) {
+      makeContext();
+    }
+  });
 
   const handlePagination = (page: number) => {
     setPage(page);
@@ -160,7 +195,12 @@ const MovieList: FC = () => {
           `https://api.themoviedb.org/3/search/movie?query=return&include_adult=false&language=en-US&page=1`,
           options,
         );
-
+        const session = await fetch(
+          "https://api.themoviedb.org/3/authentication/guest_session/new",
+          options,
+        );
+        const sessionJSON = await session.json();
+        console.log(sessionJSON);
         if (!response.ok) {
           throw new Error(`Ошибка HTTP: ${response.status}`);
         }
@@ -182,10 +222,18 @@ const MovieList: FC = () => {
       {handleOffline()}
       {handleError()}
       {showSpinner()}
-      {movieList.map((movie: Movie) => (
-        <MovieCard movie={movie} key={movie.id} />
-      ))}
-      <PaginationComponent page={page} total={totalPages} onChange={handlePagination} />
+      <GenreContext.Provider value={genres}>
+        {movieList.map((movie: Movie) => (
+          <MovieCard movie={movie} key={movie.id} />
+        ))}
+      </GenreContext.Provider>
+
+      <PaginationComponent
+        hide={!movieList.length}
+        page={page}
+        total={totalPages}
+        onChange={handlePagination}
+      />
     </div>
   );
 };

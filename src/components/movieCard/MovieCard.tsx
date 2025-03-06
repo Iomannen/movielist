@@ -1,7 +1,8 @@
-import { FC } from "react";
+import { FC, useContext } from "react";
 import style from "./movieCard.module.css";
 import placeholder from "../../assets/fluffykitten.png";
 import { format } from "date-fns";
+import { GenreContext } from "../MovieList";
 
 interface Movie {
   adult: boolean;
@@ -26,6 +27,25 @@ interface Props {
 
 const MovieCard: FC<Props> = (props) => {
   const { movie } = props;
+  const genres = useContext(GenreContext);
+
+  const findGenre = (genreNumber: number): string => {
+    let returnGenre;
+    genres?.genres.forEach((genre) => {
+      if (genre.id === genreNumber) returnGenre = genre.name;
+    });
+    return returnGenre !== undefined ? returnGenre : "as";
+  };
+
+  const pickColor = (rank: number) => {
+    return rank >= 7
+      ? style.green
+      : rank >= 5
+        ? style.yellow
+        : rank >= 3
+          ? style.orange
+          : style.red;
+  };
 
   return (
     <div className={style.card}>
@@ -39,14 +59,14 @@ const MovieCard: FC<Props> = (props) => {
       </div>
       <div className={style.content_half} style={{ width: 251 }}>
         <div className={style.title}>{movie.title}</div>
-        <div className={style.rank}>{movie.vote_average.toFixed(1)}</div>
+        <div className={pickColor(movie.vote_average)}>{movie.vote_average.toFixed(1)}</div>
         <div className={style.date}>
           {movie.release_date ? format(movie.release_date, "MMMM dd, yyyy") : "Unknown date"}
         </div>
         <div className={style.genres}>
           {movie.genre_ids.map((genre: number) => (
             <div key={genre} className={style.genre}>
-              Genre
+              {findGenre(genre)}
             </div>
           ))}
         </div>
