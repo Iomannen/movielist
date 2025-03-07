@@ -1,11 +1,11 @@
 import { FC, useState, useEffect, createContext } from "react";
+import "@ant-design/v5-patch-for-react-19";
 import style from "./movieList.module.css";
-import { Spin, Alert, Input } from "antd";
+import { Spin, Alert, Input, Button } from "antd";
 import MovieCard from "./movieCard/MovieCard";
 import { ChangeEvent } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import PaginationComponent from "./pagination/PaginationComponent";
-
 const options = {
   method: "GET",
   headers: {
@@ -47,6 +47,13 @@ interface Movie {
   vote_average: number;
   vote_count: number;
 }
+
+export interface GuestSession {
+  expires_at: string;
+  guest_session_id: string;
+  success: boolean;
+}
+
 export const GenreContext = createContext<APIGenresAnswer | null>(null);
 
 const MovieList: FC = () => {
@@ -59,6 +66,8 @@ const MovieList: FC = () => {
 
   const [genres, setGenres] = useState<APIGenresAnswer | null>(null);
 
+  const [guestSession, setSession] = useState<GuestSession | null>(null);
+  // ЗАГРУЖАЕМ ЖАНРЫ ПРИ МАУНТЕ
   useEffect(() => {
     const makeContext = async () => {
       try {
@@ -77,7 +86,7 @@ const MovieList: FC = () => {
       makeContext();
     }
   });
-
+  // ПАГИНАЦИЯ \ ПРОСТО ЗАГРУЗКА ДРУГОЙ СТРАНИЦЫ
   const handlePagination = (page: number) => {
     setPage(page);
     setMovies([]);
@@ -103,7 +112,7 @@ const MovieList: FC = () => {
     };
     fetchMovies();
   };
-
+  // ЗАГРУЗКА ФИЛЬМОВ ПО СТРОКЕ ПОИСКА
   const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
     setTotalPages(1);
     setPage(1);
@@ -126,6 +135,7 @@ const MovieList: FC = () => {
           throw new Error("Nothing is found");
         }
         setMovies(data.results);
+        console.log(data.results);
         setTotalPages(data.total_pages);
       } catch (error: unknown) {
         if (!(error instanceof Error)) return;
@@ -134,9 +144,9 @@ const MovieList: FC = () => {
     };
     fetchMovies();
   };
-
+  // ДЕБАУНС
   const debounceSearch = useDebouncedCallback(handleSearch, 1000);
-
+  // ОТОБРАЖЕНИЕ АЛЕРТА ПРИ ОФЛАЙНЕ
   const handleOffline = () => {
     return isOnline ? (
       ""
@@ -144,7 +154,7 @@ const MovieList: FC = () => {
       <Alert message="Error" description="Internet connection error" type="error" showIcon />
     );
   };
-
+  // ОТОБРАЖЕНИЕ АЛЕРТОВ
   const handleError = () => {
     return !error.state ? (
       ""
@@ -166,15 +176,16 @@ const MovieList: FC = () => {
       />
     );
   };
-
+  // СПИННЕР-ЗАГРУЗКА
   const showSpinner = () => {
+    if (movieList === undefined) return;
     return movieList.length === 0 && !error.state ? (
       <Spin size="large" className={style.alert} />
     ) : (
       ""
     );
   };
-
+  // ОТСЛЕЖИВАНИЕ ОНЛАЙН\ОФЛАЙН
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
@@ -187,7 +198,7 @@ const MovieList: FC = () => {
       window.removeEventListener("offline", handleOffline);
     };
   }, []);
-
+  // ВОТ ФУНКЦИЯ В ПЕРВЫЙ РАЗ ГРУЗЯЩАЯ ФИЛЬМЫ ПРИ МАУНТЕ ПО СЛОВУ RETURN
   useEffect(() => {
     const fetchMovies = async () => {
       try {
@@ -200,7 +211,7 @@ const MovieList: FC = () => {
           options,
         );
         const sessionJSON = await session.json();
-        console.log(sessionJSON);
+        setSession(sessionJSON);
         if (!response.ok) {
           throw new Error(`Ошибка HTTP: ${response.status}`);
         }
@@ -215,16 +226,38 @@ const MovieList: FC = () => {
 
     fetchMovies();
   }, []);
+  // ВОТ ФУНКЦИЯ ГРУЗЯЩАЯ ОЦЕНЕННЫЕ ФИЛЬМЫ C СЕРВЕРА
+  const handleClick = () => {
+    const getRatedMovies = async () => {
+      try {
+        const fetchRatedMovies = await fetch(
+          `https://api.themoviedb.org/3/guest_session/${guestSession?.guest_session_id}/rated/movies?language=en-US&page=1&sort_by=created_at.asc`,
+          options,
+        );
+        if (fetchRatedMovies.ok) {
+          const ratedMovies = await fetchRatedMovies.json();
+          setMovies(ratedMovies.results);
+          setTotalPages(ratedMovies.total_pages);
+        }
+      } catch (e) {
+        if (!(e instanceof Error)) return;
+        setError({ state: true, message: e.message });
+      }
+    };
+    getRatedMovies();
+  };
 
   return (
     <div className={style.movielist}>
+      <Button>Search</Button>
+      <Button onClick={handleClick}>Rated</Button>
       <Input className={style.input} placeholder="Type to search..." onChange={debounceSearch} />
       {handleOffline()}
       {handleError()}
       {showSpinner()}
       <GenreContext.Provider value={genres}>
         {movieList.map((movie: Movie) => (
-          <MovieCard movie={movie} key={movie.id} />
+          <MovieCard movie={movie} key={movie.id} session={guestSession} />
         ))}
       </GenreContext.Provider>
 

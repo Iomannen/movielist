@@ -22,6 +22,7 @@
     ]
   },
   "dependencies": {
+    "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "antd": "^5.24.2",
     "date-fns": "^4.1.0",
     "react": "^19.0.0",
