@@ -48,6 +48,8 @@ interface Movie {
   vote_count: number;
 }
 
+type Render = "All" | "Rated";
+
 export interface GuestSession {
   expires_at: string;
   guest_session_id: string;
@@ -60,7 +62,10 @@ const MovieList: FC = () => {
   const [totalPages, setTotalPages] = useState<number>(1);
   const [page, setPage] = useState<number>(1);
   const [searchValue, setSearchValue] = useState<string>("return");
-  const [movieList, setMovies] = useState<Movie[]>([]);
+  const [movieList, setMovieList] = useState<Movie[]>([]);
+  const [render, setRender] = useState<Render>("All");
+  const [searchPage, setSearchPage] = useState<number>(1);
+  const [movies, setMovies] = useState<Movie[]>([]);
   const [error, setError] = useState<Error>({ state: false, message: null });
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
@@ -89,22 +94,40 @@ const MovieList: FC = () => {
   // ПАГИНАЦИЯ \ ПРОСТО ЗАГРУЗКА ДРУГОЙ СТРАНИЦЫ
   const handlePagination = (page: number) => {
     setPage(page);
-    setMovies([]);
+    setMovieList([]);
     const fetchMovies = async () => {
       try {
-        const response = await fetch(
-          `https://api.themoviedb.org/3/search/movie?query=${searchValue}&include_adult=false&language=en-US&page=${page}`,
-          options,
-        );
-        if (!response.ok) {
-          throw new Error(`Ошибка HTTP: ${response.status}`);
+        if (render === "All") {
+          const response = await fetch(
+            `https://api.themoviedb.org/3/search/movie?query=${searchValue}&include_adult=false&language=en-US&page=${page}`,
+            options,
+          );
+          if (!response.ok) {
+            throw new Error(`Ошибка HTTP: ${response.status}`);
+          }
+          const data = await response.json();
+          if (data.results.length === 0) {
+            throw new Error("Nothing is found");
+          }
+          setMovieList(data.results);
+          setMovies(data.results);
+          setTotalPages(data.total_pages);
         }
-        const data = await response.json();
-        if (data.results.length === 0) {
-          throw new Error("Nothing is found");
+        if (render === "Rated") {
+          const response = await fetch(
+            `https://api.themoviedb.org/3/guest_session/${guestSession?.guest_session_id}/rated/movies?language=en-US&page=${page}&sort_by=created_at.asc`,
+            options,
+          );
+          if (!response.ok) {
+            throw new Error(`Ошибка HTTP: ${response.status}`);
+          }
+          const data = await response.json();
+          if (data.results.length === 0) {
+            throw new Error("Nothing is found");
+          }
+          setMovieList(data.results);
+          setTotalPages(data.total_pages);
         }
-        setMovies(data.results);
-        setTotalPages(data.total_pages);
       } catch (e: unknown) {
         if (!(e instanceof Error)) return;
         setError({ state: true, message: e.message });
@@ -118,7 +141,7 @@ const MovieList: FC = () => {
     setPage(1);
     setError({ state: false, message: null });
     if (e.target.value == null) return;
-    setMovies([]);
+    setMovieList([]);
     setSearchValue(e.target.value);
     const fetchMovies = async () => {
       try {
@@ -134,8 +157,9 @@ const MovieList: FC = () => {
         if (data.results.length === 0) {
           throw new Error("Nothing is found");
         }
+        setMovieList(data.results);
         setMovies(data.results);
-        console.log(data.results);
+        setSearchPage(data.total_pages);
         setTotalPages(data.total_pages);
       } catch (error: unknown) {
         if (!(error instanceof Error)) return;
@@ -212,11 +236,14 @@ const MovieList: FC = () => {
         );
         const sessionJSON = await session.json();
         setSession(sessionJSON);
+
         if (!response.ok) {
           throw new Error(`Ошибка HTTP: ${response.status}`);
         }
         const data = await response.json();
+        setMovieList(data.results);
         setMovies(data.results);
+        setSearchPage(data.total_pages);
         setTotalPages(data.total_pages);
       } catch (e: unknown) {
         if (!(e instanceof Error)) return;
@@ -227,7 +254,7 @@ const MovieList: FC = () => {
     fetchMovies();
   }, []);
   // ВОТ ФУНКЦИЯ ГРУЗЯЩАЯ ОЦЕНЕННЫЕ ФИЛЬМЫ C СЕРВЕРА
-  const handleClick = () => {
+  const setRated = () => {
     const getRatedMovies = async () => {
       try {
         const fetchRatedMovies = await fetch(
@@ -236,7 +263,7 @@ const MovieList: FC = () => {
         );
         if (fetchRatedMovies.ok) {
           const ratedMovies = await fetchRatedMovies.json();
-          setMovies(ratedMovies.results);
+          setMovieList(ratedMovies.results);
           setTotalPages(ratedMovies.total_pages);
         }
       } catch (e) {
@@ -246,11 +273,23 @@ const MovieList: FC = () => {
     };
     getRatedMovies();
   };
+  const handleButton = (event: React.MouseEvent<HTMLElement>) => {
+    const target = event.target as HTMLElement;
+    if (target.innerHTML === "Search") {
+      setRender("All");
+      setTotalPages(searchPage);
+      setMovieList(movies);
+    }
+    if (target.innerHTML === "Rated") {
+      setRender("Rated");
+      setRated();
+    }
+  };
 
   return (
     <div className={style.movielist}>
-      <Button>Search</Button>
-      <Button onClick={handleClick}>Rated</Button>
+      <Button onClick={handleButton}>Search</Button>
+      <Button onClick={handleButton}>Rated</Button>
       <Input className={style.input} placeholder="Type to search..." onChange={debounceSearch} />
       {handleOffline()}
       {handleError()}
