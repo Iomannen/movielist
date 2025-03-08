@@ -264,6 +264,7 @@ const MovieList: FC = () => {
         if (fetchRatedMovies.ok) {
           const ratedMovies = await fetchRatedMovies.json();
           setMovieList(ratedMovies.results);
+          console.log(ratedMovies);
           setTotalPages(ratedMovies.total_pages);
         }
       } catch (e) {

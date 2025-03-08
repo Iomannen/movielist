@@ -108,7 +108,7 @@ const MovieCard: FC<Props> = (props) => {
             },
           }}
         >
-          <Rate count={10} onChange={handleRate} />
+          <Rate count={10} onChange={handleRate} defaultValue={movie.rating ? movie.rating : 0} />
         </ConfigProvider>
       </div>
     </div>
