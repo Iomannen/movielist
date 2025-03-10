@@ -16,6 +16,7 @@ interface Movie {
   overview: string;
   popularity: number;
   poster_path: string;
+  rating?: number;
   release_date: string;
   title: string;
   video: boolean;
@@ -27,6 +28,12 @@ interface Props {
   movie: Movie;
   session: GuestSession | null;
 }
+interface Rate {
+  id: number;
+  rate: number;
+}
+
+const ratedMovies: Rate[] = [];
 
 const MovieCard: FC<Props> = (props) => {
   const { movie, session } = props;
@@ -43,7 +50,6 @@ const MovieCard: FC<Props> = (props) => {
       },
       body: `{"value":${event}}`,
     };
-    // ВОТ ФУНКЦИЯ ГРУЗЯЩАЯ ОЦЕНЕННЫЕ ФИЛЬМЫ C СЕРВЕРА
     const postRate = async () => {
       const postMovieRate = await fetch(
         `https://api.themoviedb.org/3/movie/${movie.id}/rating?guest_session_id=${session?.guest_session_id}`,
@@ -54,6 +60,18 @@ const MovieCard: FC<Props> = (props) => {
       console.log(postMovieRate);
     };
     postRate();
+    const ratedMovie: Rate = {
+      id: movie.id,
+      rate: event,
+    };
+    ratedMovies.push(ratedMovie);
+    console.log(ratedMovies.find((rated) => movie.id === rated.id));
+  };
+
+  const findRateDefaultValue = (): number => {
+    const mov = ratedMovies.find((rated) => movie.id === rated.id);
+    if (mov?.rate === undefined) return 0;
+    return mov?.rate;
   };
   // ПРОСТО ПОДСТАВКА ЖАНРОВ
   const findGenre = (genreNumber: number): string => {
@@ -108,7 +126,7 @@ const MovieCard: FC<Props> = (props) => {
             },
           }}
         >
-          <Rate count={10} onChange={handleRate} defaultValue={movie.rating ? movie.rating : 0} />
+          <Rate count={10} onChange={handleRate} defaultValue={findRateDefaultValue()} />
         </ConfigProvider>
       </div>
     </div>
