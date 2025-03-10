@@ -14,7 +14,7 @@
   display: flex;
   flex-direction: column;
   position: relative;
-  gap: 7px;
+  gap: 5px;
 }
 .poster {
   width: 183px;
@@ -23,7 +23,6 @@
 .title {
   width: 75%;
   font-size: 16px;
-  padding-bottom: 8px;
 }
 .red {
   position: absolute;
@@ -98,11 +97,14 @@
   overflow-y: auto;
   overflow-x: hidden;
   width: 228px;
-  height: 121px;
+  height: 114px;
   font-size: 12px;
   line-height: 2;
 }
-
+.stars {
+  position: absolute;
+  bottom: 20px;
+}
 /* Стилизация полосы прокрутки */
 .description::-webkit-scrollbar {
   width: 3px; /* ширина полосы прокрутки */

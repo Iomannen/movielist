@@ -126,7 +126,12 @@ const MovieCard: FC<Props> = (props) => {
             },
           }}
         >
-          <Rate count={10} onChange={handleRate} defaultValue={findRateDefaultValue()} />
+          <Rate
+            className={style.stars}
+            count={10}
+            onChange={handleRate}
+            defaultValue={findRateDefaultValue()}
+          />
         </ConfigProvider>
       </div>
     </div>
