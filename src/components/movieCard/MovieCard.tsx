@@ -41,7 +41,7 @@ const MovieCard: FC<Props> = (props) => {
   // ВОТ ФУНКЦИЯ КОТОРАЯ ОТПРАВЛЯЕТ ФИЛЬМ
   const handleRate = (event: number) => {
     const options = {
-      method: "POST",
+      method: event === 0 ? "DELETE" : "POST",
       headers: {
         accept: "application/json",
         "Content-Type": "application/json;charset=utf-8",
