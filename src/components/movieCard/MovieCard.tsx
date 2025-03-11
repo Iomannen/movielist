@@ -60,12 +60,15 @@ const MovieCard: FC<Props> = (props) => {
       console.log(postMovieRate);
     };
     postRate();
+    const check = ratedMovies.findIndex((rated) => movie.id === rated.id);
+    if (check !== -1) {
+      ratedMovies.splice(check, 1);
+    }
     const ratedMovie: Rate = {
       id: movie.id,
       rate: event,
     };
     ratedMovies.push(ratedMovie);
-    console.log(ratedMovies.find((rated) => movie.id === rated.id));
   };
 
   const findRateDefaultValue = (): number => {
