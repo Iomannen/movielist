@@ -106,31 +106,11 @@ const MovieList: FC = () => {
     }
   }, []);
 
-  const fetchRatedMovies = async () => {
-    setAlert(false);
-    const response = await fetch(
-      `https://api.themoviedb.org/3/guest_session/${session?.guest_session_id}/rated/movies?language=en-US&page=1&sort_by=created_at.asc`,
-      options,
-    );
-    if (response.ok) {
-      const data = await response.json();
-      setMovies(data.results);
-      setTotalPages(data.total_pages);
-      console.log(data);
-    } else {
-      setMovies([]);
-      setAlert(true);
-    }
-  };
-
   const handlePagination = (event: number) => {
     setCurrentPage(event);
     console.log(event);
   };
-  // ВОТ ЮЗ ЭФФЕКТ ОТВЕЧАЮЩИЙ ЗА РЕНДЕР СТРАНИЦЫ ПРИ НАЖАТИИ НА ПАГИНАЦИЮ
-  // Я ДОБАВИЛ tab|setTab чисто для этой функции что бы менять в зависимости от рендера
-  // Вид функции офк не такой будет на финальном этапе, это я просто для отладки так сделал
-  // пагинация в поиске полностью работает (вроде)
+
   useEffect(() => {
     const fetchMovies = async (value: string) => {
       setAlert(false);
@@ -164,6 +144,7 @@ const MovieList: FC = () => {
   }, [currentPage, tab]);
 
   const fetchMovies = async (value: string) => {
+    setCurrentPage(1);
     setAlert(false);
     const response = await fetch(
       `https://api.themoviedb.org/3/search/movie?query=${value}&include_adult=false&language=en-US&page=1`,
@@ -186,14 +167,14 @@ const MovieList: FC = () => {
     if (e.target.value !== "") fetchMovies(e.target.value);
   };
   const debounceSearch = useDebouncedCallback(handleInput, 1000);
+
   // tab меняется тут и больше нигде не используется кроме useEffect отвечающего за пагинацию
   const handleTabs = (key: string) => {
+    setCurrentPage(1);
     if (key === "search") {
       setTab("Search");
-      fetchMovies(inputRef.current!.input!.value);
     } else {
       setTab("Rated");
-      fetchRatedMovies();
     }
   };
 
