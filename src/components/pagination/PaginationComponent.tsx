@@ -1,15 +1,12 @@
 import { FC } from "react";
-import style from "../movieList.module.css";
-import { Pagination, ConfigProvider } from "antd";
 
+import { Pagination, ConfigProvider } from "antd";
 interface Props {
-  hide: boolean;
-  page: number;
   total: number;
-  onChange: (page: number) => void;
+  callback: (event: number) => void;
 }
 const PaginationComponent: FC<Props> = (props) => {
-  const { hide, page, total, onChange } = props;
+  const { total, callback } = props;
   return (
     <ConfigProvider
       theme={{
@@ -23,16 +20,7 @@ const PaginationComponent: FC<Props> = (props) => {
         },
       }}
     >
-      <Pagination
-        defaultCurrent={1}
-        current={page}
-        total={total}
-        onChange={onChange}
-        showSizeChanger={false}
-        hideOnSinglePage={true}
-        showTitle={false}
-        className={hide ? style.hide : ""}
-      />
+      <Pagination defaultCurrent={1} total={total} onChange={callback} />
     </ConfigProvider>
   );
 };

@@ -21,7 +21,7 @@ export interface GuestSession {
   success: boolean;
 }
 export type HandleRate = (event: number, movie: Movie) => void;
-
+export type Tab = "Search" | "Rated";
 export interface RateObject {
   id: number;
   rate: number;
