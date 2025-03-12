@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { Tabs } from "antd";
+import { Tabs, TabsProps } from "antd";
 
 const items: TabsProps["items"] = [
   {
@@ -12,7 +12,7 @@ const items: TabsProps["items"] = [
   },
 ];
 interface Props {
-  callback: () => void;
+  callback: (key: string) => void;
 }
 export const TabsComponent: FC<Props> = (props) => {
   const { callback } = props;

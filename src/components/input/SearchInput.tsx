@@ -1,8 +1,8 @@
-import { forwardRef } from "react";
+import { forwardRef, ChangeEvent } from "react";
 import { Input, InputRef } from "antd";
 
 interface Props {
-  callback: () => void;
+  callback: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
 export const SearchInput = forwardRef<InputRef, Props>((props, ref) => {
