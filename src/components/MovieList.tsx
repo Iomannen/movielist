@@ -19,6 +19,7 @@ import { TabsComponent } from "./tabs/Tabs.tsx";
 import { InputRef } from "antd";
 import { useDebouncedCallback } from "use-debounce";
 import PaginationComponent from "./pagination/PaginationComponent.tsx";
+
 const options = {
   method: "GET",
   headers: {
@@ -27,8 +28,10 @@ const options = {
       "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwN2IyNDYzMGY0MjcyZmM2MWQ0YzkxNGIzNTFiNzNhNCIsIm5iZiI6MTc0MDczMTM5MS4wOTEsInN1YiI6IjY3YzE3M2ZmMWYzZjgxYjYwN2EyMzE1ZSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.Gmh5Sci3JPkNbF8Y85ap3r7DGnRpgB_k0J7L_3AuHkg",
   },
 };
+
 export const Callback = createContext<HandleRate>(() => {});
 export const Genres = createContext<APIGenresAnswer | null>(null);
+
 const ratedMovies: RateObject[] = [];
 
 const notFoundAlert: AlertInterface = {
@@ -155,7 +158,6 @@ const MovieList: FC = () => {
         const data = await response.json();
         setTotalPages(data.total_pages);
         setMovies(data.results);
-        setLoading(false);
         if (data.results.length === 0 && inputRef.current!.input!.value !== "") {
           notFoundAlert.alert_message = `We can't find a movie with such name`;
           setAlert(notFoundAlert);
