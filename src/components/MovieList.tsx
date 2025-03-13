@@ -108,12 +108,10 @@ const MovieList: FC = () => {
 
   const handlePagination = (event: number) => {
     setCurrentPage(event);
-    console.log(event);
   };
 
   useEffect(() => {
     const fetchMovies = async (value: string) => {
-      setAlert(false);
       if (tab === "Search") {
         const response = await fetch(
           `https://api.themoviedb.org/3/search/movie?query=${value}&include_adult=false&language=en-US&page=${currentPage}`,
@@ -133,7 +131,7 @@ const MovieList: FC = () => {
           const data = await response.json();
           setTotalPages(data.total_pages);
           setMovies(data.results);
-          console.log(data);
+          setAlert(false);
         } else {
           setMovies([]);
           setAlert(true);
@@ -152,11 +150,14 @@ const MovieList: FC = () => {
     );
     const data = await response.json();
     setMovies(data.results);
+    console.log(data);
+    console.log(data.total_pages);
     setTotalPages(data.total_pages);
     setLoading(false);
   };
 
   const handleInput = (e: ChangeEvent<HTMLInputElement>): void => {
+    setTab("Search");
     setAlert(false);
     setLoading(true);
     setMovies([]);
@@ -168,10 +169,9 @@ const MovieList: FC = () => {
   };
   const debounceSearch = useDebouncedCallback(handleInput, 1000);
 
-  // tab меняется тут и больше нигде не используется кроме useEffect отвечающего за пагинацию
   const handleTabs = (key: string) => {
     setCurrentPage(1);
-    if (key === "search") {
+    if (key === "Search") {
       setTab("Search");
     } else {
       setTab("Rated");
@@ -180,14 +180,20 @@ const MovieList: FC = () => {
 
   return (
     <div className={style.movielist}>
-      <TabsComponent callback={handleTabs} />
+      <TabsComponent callback={handleTabs} tab={tab} />
       <SearchInput callback={debounceSearch} ref={inputRef} />
       <NotFoundAlertComponent alert={alert} />
       <Loading loading={loading} />
       <Callback.Provider value={handleRate}>
         <RenderList movies={movies} />
       </Callback.Provider>
-      <PaginationComponent total={totalPages} callback={handlePagination} />
+      <PaginationComponent
+        alert={alert}
+        loading={loading}
+        total={totalPages}
+        current={currentPage}
+        callback={handlePagination}
+      />
     </div>
   );
 };

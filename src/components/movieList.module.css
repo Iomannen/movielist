@@ -14,6 +14,10 @@
   position: absolute;
   top: 40%;
 }
+.pagination {
+  width: 100%;
+  justify-content: center;
+}
 .hide {
   display: none;
 }
