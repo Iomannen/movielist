@@ -72,7 +72,7 @@ const MovieCard: FC<Props> = (props) => {
             onChange={(event) => {
               handleRate(event, movie);
             }}
-            defaultValue={getDefaultRate()}
+            defaultValue={movie.rating ? movie.rating : getDefaultRate()}
           />
         </ConfigProvider>
       </div>

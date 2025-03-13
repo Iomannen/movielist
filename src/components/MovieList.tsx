@@ -56,20 +56,19 @@ const MovieList: FC = () => {
     };
     postRate();
     const check = ratedMovies.findIndex((rated) => movie.id === rated.id);
-    if (check !== -1) {
-      ratedMovies.splice(check, 1);
-    }
-    const ratedMovie: RateObject = {
-      id: movie.id,
-      rate: event,
-    };
     if (event === 0) {
       ratedMovies.splice(check, 1);
     } else {
+      if (check !== -1) {
+        ratedMovies.splice(check, 1);
+      }
+      const ratedMovie: RateObject = {
+        id: movie.id,
+        rate: event,
+      };
       ratedMovies.push(ratedMovie);
     }
     localStorage.setItem("rated_movies", JSON.stringify(ratedMovies));
-    console.log(ratedMovies);
   };
 
   const createSession = async () => {
@@ -90,6 +89,7 @@ const MovieList: FC = () => {
     parsedRatedMovies.forEach((movie: RateObject) => {
       ratedMovies.push(movie);
     });
+    console.log(ratedMovies);
   }, []);
 
   useEffect(() => {
