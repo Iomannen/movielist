@@ -4,7 +4,15 @@ import style from "./movieList.module.css";
 import { SearchInput } from "./input/SearchInput";
 import { ChangeEvent } from "react";
 import { NotFoundAlertComponent } from "./alerts/Alert";
-import { Movie, GuestSession, HandleRate, RateObject, Tab } from "../types/types.tsx";
+import {
+  Movie,
+  GuestSession,
+  HandleRate,
+  RateObject,
+  Tab,
+  AlertInterface,
+  APIGenresAnswer,
+} from "../types/types.tsx";
 import { RenderList } from "./renderlist/RenderList";
 import { Loading } from "./loading/Loading";
 import { TabsComponent } from "./tabs/Tabs.tsx";
@@ -20,18 +28,45 @@ const options = {
   },
 };
 export const Callback = createContext<HandleRate>(() => {});
-
+export const Genres = createContext<APIGenresAnswer | null>(null);
 const ratedMovies: RateObject[] = [];
+
+const notFoundAlert: AlertInterface = {
+  show: true,
+  alert_type: "Alert",
+  alert_message: "It seems that search is empty, try to enter something and we'll find the movies.",
+  alert_code: "Oops...",
+};
 
 const MovieList: FC = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [alert, setAlert] = useState<boolean>(true);
+  const [alert, setAlert] = useState<AlertInterface>(notFoundAlert);
   const [session, setSession] = useState<GuestSession>();
   const [totalPages, setTotalPages] = useState<number>(1);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [tab, setTab] = useState<Tab>("Search");
+  const [genres, setGenres] = useState<APIGenresAnswer | null>(null);
   const inputRef = useRef<InputRef>(null);
+
+  useEffect(() => {
+    const makeContext = async () => {
+      try {
+        const genresResponse = await fetch(
+          "https://api.themoviedb.org/3/genre/movie/list?language=en",
+          options,
+        );
+        const genresData = await genresResponse.json();
+        setGenres(genresData);
+      } catch (e) {
+        console.error("Failed to load genres:", e);
+      }
+    };
+
+    if (genres === null) {
+      makeContext();
+    }
+  });
 
   const handleRate = (event: number, movie: Movie): void => {
     const options = {
@@ -121,6 +156,14 @@ const MovieList: FC = () => {
         setTotalPages(data.total_pages);
         setMovies(data.results);
         setLoading(false);
+        if (data.results.length === 0 && inputRef.current!.input!.value !== "") {
+          notFoundAlert.alert_message = `We can't find a movie with such name`;
+          setAlert(notFoundAlert);
+        } else if (inputRef.current!.input!.value === "") {
+          setAlert(notFoundAlert);
+        } else {
+          setAlert({ show: false });
+        }
       }
       if (tab === "Rated") {
         const response = await fetch(
@@ -131,10 +174,16 @@ const MovieList: FC = () => {
           const data = await response.json();
           setTotalPages(data.total_pages);
           setMovies(data.results);
-          setAlert(false);
+          setAlert({ show: false });
         } else {
           setMovies([]);
-          setAlert(true);
+          const error: AlertInterface = {
+            show: true,
+            alert_type: "Error",
+            alert_message: "Sonmething went wrong",
+            alert_code: `${response.status}`,
+          };
+          setAlert(error);
         }
       }
     };
@@ -143,26 +192,30 @@ const MovieList: FC = () => {
 
   const fetchMovies = async (value: string) => {
     setCurrentPage(1);
-    setAlert(false);
+    setAlert({ show: false });
     const response = await fetch(
       `https://api.themoviedb.org/3/search/movie?query=${value}&include_adult=false&language=en-US&page=1`,
       options,
     );
     const data = await response.json();
     setMovies(data.results);
-    console.log(data);
-    console.log(data.total_pages);
     setTotalPages(data.total_pages);
     setLoading(false);
+    if (data.results.length === 0) {
+      notFoundAlert.alert_message = `We can't find a movie with such name`;
+      setAlert(notFoundAlert);
+    }
   };
 
   const handleInput = (e: ChangeEvent<HTMLInputElement>): void => {
     setTab("Search");
-    setAlert(false);
+    setAlert({ show: false });
     setLoading(true);
     setMovies([]);
     if (e.target.value === "") {
-      setAlert(true);
+      notFoundAlert.alert_message =
+        "It seems that search is empty, try to enter something and we'll find the movies.";
+      setAlert(notFoundAlert);
       setLoading(false);
     }
     if (e.target.value !== "") fetchMovies(e.target.value);
@@ -185,10 +238,12 @@ const MovieList: FC = () => {
       <NotFoundAlertComponent alert={alert} />
       <Loading loading={loading} />
       <Callback.Provider value={handleRate}>
-        <RenderList movies={movies} />
+        <Genres.Provider value={genres}>
+          <RenderList movies={movies} />
+        </Genres.Provider>
       </Callback.Provider>
       <PaginationComponent
-        alert={alert}
+        alert={alert.show}
         loading={loading}
         total={totalPages}
         current={currentPage}

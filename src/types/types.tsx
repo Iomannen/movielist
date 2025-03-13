@@ -26,3 +26,20 @@ export interface RateObject {
   id: number;
   rate: number;
 }
+export type AlertType = "Error" | "Alert";
+export interface AlertInterface {
+  show: boolean;
+  alert_type?: AlertType;
+  alert_message?: string;
+  alert_code?: number | string;
+}
+
+export interface Genre {
+  id: number;
+  name: string;
+}
+export type GenreArray = Array<Genre>;
+
+export interface APIGenresAnswer {
+  genres: GenreArray;
+}

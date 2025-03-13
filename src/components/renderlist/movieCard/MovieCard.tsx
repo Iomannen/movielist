@@ -4,7 +4,7 @@ import placeholder from "../../../assets/fluffykitten.png";
 import { format } from "date-fns";
 import { Rate, ConfigProvider } from "antd";
 import { Movie, RateObject } from "../../../types/types";
-import { Callback } from "../../MovieList";
+import { Callback, Genres } from "../../MovieList";
 interface Props {
   movie: Movie;
 }
@@ -12,6 +12,15 @@ interface Props {
 const MovieCard: FC<Props> = (props) => {
   const { movie } = props;
   const handleRate = useContext(Callback);
+  const genres = useContext(Genres);
+
+  const findGenre = (genreNumber: number): string => {
+    let returnGenre;
+    genres?.genres.forEach((genre) => {
+      if (genre.id === genreNumber) returnGenre = genre.name;
+    });
+    return returnGenre !== undefined ? returnGenre : "Genre";
+  };
 
   const getDefaultRate = (): number => {
     const storageRatedMovies = localStorage.getItem("rated_movies");
@@ -51,7 +60,7 @@ const MovieCard: FC<Props> = (props) => {
         <div className={style.genres}>
           {movie.genre_ids.map((genre: number) => (
             <div key={genre} className={style.genre}>
-              Genre
+              {findGenre(genre)}
             </div>
           ))}
         </div>

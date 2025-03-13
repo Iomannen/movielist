@@ -1,17 +1,19 @@
 import { FC } from "react";
 import { Alert } from "antd";
 import style from "../movieList.module.css";
+import { AlertInterface } from "../../types/types";
 interface Props {
-  alert: boolean;
+  alert: AlertInterface;
 }
 
 export const NotFoundAlertComponent: FC<Props> = (props) => {
   const { alert } = props;
-  return alert ? (
+
+  return alert.show ? (
     <Alert
-      message="Oops"
-      description="It seems that search is empty, try to enter something and we'll find the movies."
-      type="info"
+      message={alert.alert_code}
+      description={alert.alert_message}
+      type={alert.alert_type === "Error" ? "error" : "info"}
       className={style.alert}
     />
   ) : (
