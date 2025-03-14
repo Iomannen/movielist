@@ -1,6 +1,13 @@
-import { useEffect, useState } from "react";
-import { APIGenresAnswer, GuestSession, RateObject, Movie } from "../types/types";
-
+import { useEffect, useState, ChangeEvent } from "react";
+import {
+  APIGenresAnswer,
+  GuestSession,
+  RateObject,
+  Movie,
+  AlertInterface,
+  Tab,
+} from "../types/types";
+import { useDebouncedCallback } from "use-debounce";
 const options = {
   method: "GET",
   headers: {
@@ -98,4 +105,95 @@ export const useMount = () => {
   return { genres, session, ratedMovies, handleRate };
 };
 
-export const usePagination = () => {};
+const notFoundAlert: AlertInterface = {
+  show: true,
+  alert_type: "Alert",
+  alert_message: "It seems that search is empty, try to enter something and we'll find the movies.",
+  alert_code: "Oops...",
+};
+
+export const useSearch = (session: GuestSession | undefined) => {
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [value, setValue] = useState<string>("");
+  const [alert, setAlert] = useState<AlertInterface>(notFoundAlert);
+  const [tab, setTab] = useState<Tab>("Search");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [loading, setLoading] = useState<boolean>(false);
+  const handlePagination = (event: number) => {
+    setCurrentPage(event);
+  };
+
+  const handleInput = (e: ChangeEvent<HTMLInputElement>): void => {
+    setTab("Search");
+    setValue(e.target.value);
+  };
+  const debouncedSearch = useDebouncedCallback(handleInput, 1000);
+
+  useEffect(() => {
+    setLoading(true);
+    setMovies([]);
+    const fetchMovies = async (value: string) => {
+      if (tab === "Search") {
+        const response = await fetch(
+          `https://api.themoviedb.org/3/search/movie?query=${value}&include_adult=false&language=en-US&page=${currentPage}`,
+          options,
+        );
+        const data = await response.json();
+        setTotalPages(data.total_pages);
+        setMovies(data.results);
+        if (data.results.length === 0 && value !== "") {
+          notFoundAlert.alert_message = `We can't find a movie with such name`;
+          setAlert(notFoundAlert);
+        } else if (value === "") {
+          setAlert(notFoundAlert);
+        } else {
+          setAlert({ show: false });
+        }
+      }
+      if (tab === "Rated") {
+        const response = await fetch(
+          `https://api.themoviedb.org/3/guest_session/${session?.guest_session_id}/rated/movies?language=en-US&page=${currentPage}&sort_by=created_at.asc`,
+          options,
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setTotalPages(data.total_pages);
+          setMovies(data.results);
+          setAlert({ show: false });
+        } else {
+          setMovies([]);
+          const error: AlertInterface = {
+            show: true,
+            alert_type: "Error",
+            alert_message: "Sonmething went wrong",
+            alert_code: `${response.status}`,
+          };
+          setAlert(error);
+        }
+      }
+      setLoading(false);
+    };
+    fetchMovies(value);
+  }, [currentPage, tab, value]);
+
+  const handleTabs = (key: string) => {
+    setCurrentPage(1);
+    if (key === "Search") {
+      setTab("Search");
+    } else {
+      setTab("Rated");
+    }
+  };
+  return {
+    loading,
+    debouncedSearch,
+    handlePagination,
+    handleTabs,
+    movies,
+    alert,
+    tab,
+    currentPage,
+    totalPages,
+  };
+};
