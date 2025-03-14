@@ -1,18 +1,17 @@
-import { FC, useContext } from "react";
+import { FC } from "react";
 import style from "./movieCard.module.css";
 import placeholder from "../../../assets/fluffykitten.png";
 import { format } from "date-fns";
 import { Rate, ConfigProvider } from "antd";
-import { Movie, RateObject } from "../../../types/types";
-import { Callback, Genres } from "../../MovieList";
+import { Movie, RateObject, APIGenresAnswer, HandleRate } from "../../../types/types";
 interface Props {
   movie: Movie;
+  genres: APIGenresAnswer | null;
+  callback: HandleRate;
 }
 
 const MovieCard: FC<Props> = (props) => {
-  const { movie } = props;
-  const handleRate = useContext(Callback);
-  const genres = useContext(Genres);
+  const { movie, genres, callback } = props;
 
   const findGenre = (genreNumber: number): string => {
     let returnGenre;
@@ -79,7 +78,7 @@ const MovieCard: FC<Props> = (props) => {
             className={style.stars}
             count={10}
             onChange={(event) => {
-              handleRate(event, movie);
+              callback(event, movie);
             }}
             defaultValue={movie.rating ? movie.rating : getDefaultRate()}
           />
